@@ -1,5 +1,3 @@
-# main_dialog.py
-
 import os
 import requests
 from gtts import gTTS
@@ -13,16 +11,12 @@ from aqt import mw
 from aqt.qt import (
     QDialog,
     QVBoxLayout,
-    QHBoxLayout,
     QLabel,
     QLineEdit,
     QComboBox,
     QPushButton,
-    QMessageBox,
 )
-from aqt.utils import showInfo, showWarning, tooltip
-
-# --- Dictionary and Translation Logic ---
+from aqt.utils import showWarning, tooltip
 
 def _get_dictionary_data(word):
     try:
@@ -87,7 +81,7 @@ class CardCreatorDialog(QDialog):
         # Card Type Selector
         self.type_label = QLabel("Select Type:")
         self.type_combo = QComboBox()
-        self.type_combo.addItems(["Simple Audio", "Spelling Rescue"])
+        self.type_combo.addItems(["Spelling Rescue", "Simple Audio"])
         layout.addWidget(self.type_label)
         layout.addWidget(self.type_combo)
 
@@ -188,4 +182,3 @@ def show_main_dialog():
     dialog = CardCreatorDialog(mw)
     log.debug("Showing main dialog.")
     dialog.show()
-    # dialog.exec_()
