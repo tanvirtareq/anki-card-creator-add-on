@@ -46,7 +46,6 @@ SPELLING_RESCUE_MODEL = genanki.Model(
         {'name': 'Synonyms (BN)'},
         {'name': 'Sentence (EN)'},
         {'name': 'Sentence (BN)'},
-        {'name': 'Usage Tips'},
     ],
     templates=[
         {
@@ -57,7 +56,6 @@ SPELLING_RESCUE_MODEL = genanki.Model(
                     '<b>Meaning:</b> {{Meaning (EN)}}<br><em>{{Meaning (BN)}}</em><br><br>'
                     '<b>Synonyms:</b> {{Synonyms (EN)}}<br><em>{{Synonyms (BN)}}</em><br><br>'
                     '<b>Example:</b> {{Sentence (EN)}}<br><em>{{Sentence (BN)}}</em><br><br>'
-                    '<i>{{Usage Tips}}</i>'
         },
     ])
 
@@ -133,7 +131,6 @@ class Api:
                         dict_data['synonyms_bn'],
                         dict_data['sentence_en'],
                         dict_data['sentence_bn'],
-                        "Usage tips coming soon!"
                     ])
             else: # Default to Simple Audio
                 deck = SIMPLE_DECK
