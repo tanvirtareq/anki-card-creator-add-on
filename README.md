@@ -1,61 +1,112 @@
 # Anki Card Creator Add-on
 
-This is an Anki add-on that lets you quickly create feature-rich flashcards from within the Anki application.
+## 1. What this Add-on Does
 
-## Features
+This Anki add-on provides a streamlined way to create rich flashcards directly within your Anki application. It supports two distinct card types, automatically fetches dictionary data, translates it to Bangla, and handles media, making card creation efficient and comprehensive.
 
--   **Integrated UI:** A new "Add Card" button appears in the Deck Browser for quick access.
--   **Adds to Current Deck:** Automatically adds the newly created card to the deck you are currently viewing.
--   **Two Card Types:**
-    -   **Simple Audio:** A basic card with audio on the front and the word/phonetics on the back.
-    -   **Spelling Rescue:** An interactive card with audio and a text box on the front. The back includes the answer, definitions, synonyms, and an example sentence, all with Bangla translations.
--   **Automatic Model Creation:** The required Anki Note Types ("Simple Audio Model" and "Spelling Rescue Model") are created automatically if they don't exist.
--   **Automatic Data Fetching & Translation:** For Spelling Rescue cards, it automatically fetches data from a dictionary and translates it to Bangla.
--   **Seamless Media Handling:** Audio files are automatically added to your Anki collection's media folder.
+**Key Features:**
 
-## Requirements
+*   **Integrated UI:** A dedicated "Add Card" button appears in Anki's Deck Browser for quick access.
+*   **Adds to Current Deck:** New cards are automatically added to the deck you are currently viewing in Anki.
+*   **Two Card Types:**
+    *   **Simple Audio:** A basic card with audio on the front and the word/phonetic transcription on the back.
+    *   **Spelling Rescue:** An interactive card designed for spelling practice. The front features audio and a text input field for the user to type the word. The back displays the correct word, its meaning (English & Bangla), synonyms (English & Bangla), and usage in a sentence (English & Bangla).
+*   **Automatic Data Fetching & Translation:** For "Spelling Rescue" cards, the add-on automatically retrieves word definitions, synonyms, and example sentences from a dictionary API and translates them to Bangla.
+*   **Automatic Model Creation:** The necessary Anki Note Types ("Simple Audio Model" and "Spelling Rescue Model") are automatically created in your collection if they don't already exist.
+*   **Seamless Media Handling:** Generated audio files are automatically added to your Anki collection's media folder, ensuring they work across devices.
 
--   Anki Desktop application (version 2.1.20+ recommended).
--   An active internet connection (for dictionary lookup and translation).
+## 2. How to Use
 
-## Installation
+1.  **Open Anki:** Launch your Anki Desktop application.
+2.  **Navigate to Deck Browser:** Go to the main screen where all your decks are listed.
+3.  **Click "Add Card":** A new "Add Card" button will be visible on the bottom toolbar of the Deck Browser. Click it.
+4.  **Create Your Card:** A dedicated "Anki Card Creator" window will appear:
+    *   Enter the English word or phrase you wish to create a card for.
+    *   Select the desired card type from the dropdown menu: "Simple Audio" or "Spelling Rescue".
+    *   Click the "Create Card" button.
+5.  **Card Added:** The new card will be automatically added to the deck you were viewing when you clicked the "Add Card" button.
 
-1.  **Close Anki:** Make sure Anki is not running.
+## 3. Setup (For Developers/Contributors)
 
-2.  **Find Your Add-ons Folder:**
-    -   Open Anki, go to `Tools > Add-ons`.
-    -   Click the `View Files` button. This will open your Anki add-ons folder in your file explorer.
-    -   The path is usually something like `Documents/Anki2/addons21` or `~/Library/Application Support/Anki2/addons21`.
+This section is for setting up the project for development or if you wish to manually install the add-on.
 
-3.  **Copy the Add-on:**
-    -   Copy the entire `AnkiCardCreatorAddon` folder from this project into the add-ons folder you just opened.
+**Requirements:**
+
+*   [Python 3](https://www.python.org/downloads/) (3.8+ recommended)
+*   Anki Desktop application (version 2.1.20+ recommended, though tested with 25.07.5 development build)
+*   An active internet connection (required for audio generation, dictionary lookups, and translations).
+
+**Project Structure:**
+
+```
+Anki Card Creator/
+├── AnkiCardCreatorAddon/  # The main add-on folder
+│   ├── __init__.py        # Add-on entry point and setup
+│   ├── main_dialog.py     # UI and core card creation logic
+│   ├── logger.py          # Centralized logging configuration
+│   ├── requirements.txt   # Python dependencies for the add-on
+│   ├── vendor/            # Directory for vendored (bundled) Python libraries
+│   └── card_creator/      # Package containing card creation factory and classes
+│       ├── __init__.py
+│       └── card_creators.py
+└── deploy.sh              # Script for easy deployment (macOS)
+```
+
+## 4. How to Add this Add-on to Anki
+
+To install this add-on into your Anki application:
+
+1.  **Close Anki:** Ensure your Anki Desktop application is completely closed before proceeding.
+
+2.  **Find Your Anki Add-ons Folder:**
+    *   Open Anki (temporarily, if closed).
+    *   Go to `Tools > Add-ons`.
+    *   Click the `View Files` button at the bottom. This will open your Anki add-ons folder in your system's file explorer.
+    *   The typical path is `~/Library/Application Support/Anki2/addons21` on macOS, or similar on other operating systems.
+
+3.  **Copy the Add-on Folder:**
+    *   Copy the entire `AnkiCardCreatorAddon` folder (from where you cloned/downloaded this project) into the add-ons folder you just opened in step 2.
 
 4.  **Install Dependencies:**
-    -   This add-on requires external Python libraries. You need to install them directly into the add-on's `vendor` folder.
-    -   Open your terminal or command prompt and run the following commands:
+    *   This add-on bundles its Python dependencies. You need to install them into the add-on's `vendor` subfolder.
+    *   Open your terminal or command prompt.
+    *   Navigate into the `AnkiCardCreatorAddon` folder that you just copied into Anki's add-ons directory. For example:
+        ```bash
+        cd "~/Library/Application Support/Anki2/addons21/AnkiCardCreatorAddon"
+        ```
+    *   Run the following command to install the dependencies:
+        ```bash
+        pip3 install -r requirements.txt -t ./vendor
+        ```
+        *(Note: Use `pip` instead of `pip3` if your system's default Python 3 `pip` command is just `pip`.)*
+
+5.  **Start Anki:** Launch the Anki application. The add-on should now be active and the "Add Card" button visible in the Deck Browser.
+
+## 5. How to Use `deploy.sh` (macOS)
+
+The `deploy.sh` script is a convenience tool for macOS users to quickly install, update, and test the add-on during development. It automates quitting Anki, copying the latest code, installing dependencies, and restarting Anki.
+
+1.  **Make Executable:** If you haven't already, make the script executable:
     ```bash
-    # Navigate to the add-on folder you just copied
-    cd "/path/to/your/Anki2/addons21/AnkiCardCreatorAddon"
-
-    # Install the dependencies from requirements.txt into the 'vendor' subfolder
-    pip install -r requirements.txt -t ./vendor
+    chmod +x deploy.sh
     ```
-    - The add-on is configured to automatically load these libraries from the `vendor` folder upon startup.
 
-5.  **Start Anki:** Start the Anki application. The add-on will now be active.
+2.  **Run the Script:**
+    *   **Standard Deployment:** To deploy the add-on without live logging:
+        ```bash
+        ./deploy.sh
+        ```
+    *   **Debug Deployment (with Live Log):** To deploy the add-on and see its live log output in your terminal (useful for debugging):
+        ```bash
+        ./deploy.sh --debug
+        ```
+        *   When running in debug mode, the terminal will display the `addon.log` file's content live. Press `Ctrl+C` in the terminal to stop tailing the log (this will not close Anki).
 
-## How to Use
+**What `deploy.sh` does:**
 
-1.  **Open Anki:** Start the Anki application.
-2.  **Go to Deck Browser:** The main screen showing all your decks.
-3.  **Click "Add Card":** A new "Add Card" button will be visible on the bottom toolbar. Click it.
-4.  **Create Your Card:** The Card Creator window will open. Enter a word, select the card type, and click "Create Card".
-5.  **Done:** The card will be automatically added to the deck you were viewing.
-
-## Project Files
-
-- `AnkiCardCreatorAddon/`
-  - `__init__.py`: The main entry point that loads the add-on and its dependencies.
-  - `main_dialog.py`: Contains all the UI and logic for the card creator window.
-  - `requirements.txt`: A list of the Python libraries the add-on needs.
-  - `vendor/`: The folder where the dependencies are installed.
+*   Gracefully quits Anki (force-quits if necessary).
+*   Removes any previous installation of the `AnkiCardCreatorAddon` from your Anki add-ons folder.
+*   Copies the latest `AnkiCardCreatorAddon` from your project directory to Anki's add-ons folder.
+*   Installs all required Python dependencies into the `vendor/` subfolder within the copied add-on.
+*   Restarts Anki.
+*   If `--debug` is used, it enables detailed logging within the add-on and displays the `addon.log` file's content in your terminal.
