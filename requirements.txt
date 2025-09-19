@@ -2,3 +2,4 @@ pywebview
 gTTS
 genanki
 eng-to-ipa
+deep-translator

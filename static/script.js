@@ -1,10 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
     const createBtn = document.getElementById('createBtn');
     const wordInput = document.getElementById('wordInput');
+    const cardTypeSelect = document.getElementById('cardTypeSelect');
     const statusDiv = document.getElementById('status');
 
     createBtn.addEventListener('click', async () => {
         const word = wordInput.value.trim();
+        const cardType = cardTypeSelect.value;
 
         if (!word) {
             updateStatus('Please enter a word or phrase.', 'danger');
@@ -17,8 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
         statusDiv.innerHTML = ''; // Clear previous status
 
         try {
-            // Call the Python API
-            const result = await window.pywebview.api.create_card(word);
+            // Call the Python API with the card type
+            const result = await window.pywebview.api.create_card(word, cardType);
 
             if (result.status === 'success') {
                 updateStatus(result.message, 'success');

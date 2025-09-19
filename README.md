@@ -1,18 +1,21 @@
 # Anki Card Creator
 
-A simple desktop application to quickly create Anki flashcards with audio and phonetic transcription.
+A simple desktop application to quickly create Anki flashcards with audio, phonetic transcription, definitions, and translations.
 
 ## Features
 
 -   **Cross-Platform:** Runs on Windows, macOS, and Linux.
--   **Simple Interface:** A clean and minimalist UI for ease of use.
--   **Audio Generation:** Automatically generates English audio for your words or phrases using Google Text-to-Speech.
--   **Phonetic Transcription:** Includes the IPA phonetic transcription on the back of the card.
--   **Ready-to-Import:** Creates a `.apkg` file that you can directly import into your Anki application.
+-   **Two Card Types:**
+    -   **Simple Audio:** A basic card with audio on the front and the word/phonetics on the back.
+    -   **Spelling Rescue:** An interactive card with audio and a text box on the front. The back includes the answer, definitions, synonyms, and an example sentence, all with Bangla translations.
+-   **Automatic Data Fetching:** For Spelling Rescue cards, it automatically fetches data from a dictionary API.
+-   **Automatic Translation:** Fetched data is translated to Bangla.
+-   **Ready-to-Import:** Creates a single `output.apkg` file that you can directly import into your Anki application.
 
 ## Requirements
 
 -   [Python 3](https://www.python.org/downloads/)
+-   An active internet connection (for audio generation, dictionary lookup, and translation).
 
 ## Setup Instructions
 
@@ -51,10 +54,11 @@ A window for the "Anki Card Creator" should appear.
 
 ## How to Use
 
-1.  **Enter a Word:** Type the English word or short phrase you want to create a card for into the input box.
-2.  **Click Create:** Press the "Create Card" button.
-3.  **Find Your Deck:** A file named `output.apkg` will be created or updated in the project directory.
-4.  **Import to Anki:** Open your Anki Desktop application, go to `File > Import...`, and select the `output.apkg` file. Your new card will be added to the "Generated Cards" deck.
+1.  **Enter a Word:** Type the English word you want to create a card for.
+2.  **Select Type:** Choose either "Simple Audio" or "Spelling Rescue" from the dropdown menu.
+3.  **Click Create:** Press the "Create Card" button.
+4.  **Find Your Deck:** A file named `output.apkg` will be created or updated in the project directory.
+5.  **Import to Anki:** Open your Anki Desktop application, go to `File > Import...`, and select the `output.apkg` file. Your new card will be added to the corresponding deck ("Generated Simple Cards" or "Generated Spelling Cards").
 
 ## Project Files
 
