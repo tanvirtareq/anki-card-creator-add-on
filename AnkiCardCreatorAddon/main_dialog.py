@@ -1,11 +1,9 @@
 import os
-import requests
 from gtts import gTTS
-from deep_translator import GoogleTranslator
-import eng_to_ipa as ipa
 
 # Import the logger instance from the main __init__.py
 from . import log
+from .card_creator.card_creator_factory import CardCreatorFactory
 
 from aqt import mw
 from aqt.qt import (
@@ -19,117 +17,6 @@ from aqt.qt import (
 from aqt.utils import showWarning, tooltip
 
 # --- Dictionary and Translation Logic ---
-
-def _get_dictionary_data(word):
-    try:
-        response = requests.get(f"https://api.dictionaryapi.dev/api/v2/entries/en/{word}")
-        response.raise_for_status()
-        data = response.json()[0]
-
-        meaning = data['meanings'][0]['definitions'][0]['definition']
-        synonyms = ", ".join(data['meanings'][0]['synonyms'][:3])
-        sentence = next((d['example'] for m in data['meanings'] for d in m['definitions'] if 'example' in d), "")
-
-        meaning_bn = GoogleTranslator(source='auto', target='bn').translate(meaning)
-        synonyms_bn = GoogleTranslator(source='auto', target='bn').translate(synonyms)
-        sentence_bn = GoogleTranslator(source='auto', target='bn').translate(sentence)
-
-        return {
-            "meaning_en": meaning,
-            "meaning_bn": meaning_bn,
-            "synonyms_en": synonyms,
-            "synonyms_bn": synonyms_bn,
-            "sentence_en": sentence,
-            "sentence_bn": sentence_bn,
-        }
-    except Exception:
-        log.error(f"Could not fetch dictionary data for '{word}'", exc_info=True)
-        return None
-
-# --- Anki Model Management ---
-
-def get_or_create_model(model_name, fields, qfmt, afmt):
-    model = mw.col.models.by_name(model_name)
-    if model is None:
-        log.debug(f"Model '{model_name}' not found, creating it.")
-        model = mw.col.models.new(model_name)
-        for field in fields:
-            mw.col.models.add_field(model, mw.col.models.new_field(field))
-        
-        template = mw.col.models.new_template("Card 1")
-        template['qfmt'] = qfmt
-        template['afmt'] = afmt
-        mw.col.models.add_template(model, template)
-        mw.col.models.add(model)
-    return model
-
-# --- Card Creator Classes (Factory Pattern) ---
-
-class BaseCardCreator:
-    def __init__(self, word, audio_field, deck_id, parent_dialog):
-        self.word = word
-        self.audio_field = audio_field
-        self.deck_id = deck_id
-        self.parent_dialog = parent_dialog
-
-    def create_note(self):
-        raise NotImplementedError
-
-class SimpleAudioCardCreator(BaseCardCreator):
-    def create_note(self):
-        model = get_or_create_model(
-            model_name="Simple Audio Model",
-            fields=['Word', 'Phonetics', 'Audio'],
-            qfmt='{{Audio}}',
-            afmt='{{FrontSide}}<hr id="answer">{{Word}}<br>{{Phonetics}}'
-        )
-        note = mw.col.new_note(model)
-        note['Word'] = self.word
-        note['Phonetics'] = ipa.convert(self.word)
-        note['Audio'] = self.audio_field
-        mw.col.add_note(note, self.deck_id)
-        log.debug(f"Simple Audio note for '{self.word}' added to deck ID {self.deck_id}")
-
-class SpellingRescueCardCreator(BaseCardCreator):
-    def create_note(self):
-        model = get_or_create_model(
-            model_name="Spelling Rescue Model",
-            fields=['Word', 'Audio', 'Meaning (EN)', 'Meaning (BN)', 'Synonyms (EN)', 'Synonyms (BN)', 'Sentence (EN)', 'Sentence (BN)'],
-            qfmt='{{Audio}}<br>{{type:Word}}',
-            afmt='{{FrontSide}}<hr id="answer">'
-                 '<div id="word">{{Word}}</div><br>'
-                 '<b>Meaning:</b> {{Meaning (EN)}}<br><em>{{Meaning (BN)}}</em><br><br>'
-                 '<b>Synonyms:</b> {{Synonyms (EN)}}<br><em>{{Synonyms (BN)}}</em><br><br>'
-                 '<b>Example:</b> {{Sentence (EN)}}<br><em>{{Sentence (BN)}}</em>'
-        )
-        dict_data = _get_dictionary_data(self.word)
-        if not dict_data:
-            showWarning(f"Could not find dictionary data for '{self.word}'.", parent=self.parent_dialog)
-            return
-
-        note = mw.col.new_note(model)
-        note['Word'] = self.word
-        note['Audio'] = self.audio_field
-        note['Meaning (EN)'] = dict_data['meaning_en']
-        note['Meaning (BN)'] = dict_data['meaning_bn']
-        note['Synonyms (EN)'] = dict_data['synonyms_en']
-        note['Synonyms (BN)'] = dict_data['synonyms_bn']
-        note['Sentence (EN)'] = dict_data['sentence_en']
-        note['Sentence (BN)'] = dict_data['sentence_bn']
-        mw.col.add_note(note, self.deck_id)
-        log.debug(f"Spelling Rescue note for '{self.word}' added to deck ID {self.deck_id}")
-
-class CardCreatorFactory:
-    @staticmethod
-    def get_creator(card_type, word, audio_field, deck_id, parent_dialog):
-        if card_type == "Spelling Rescue":
-            return SpellingRescueCardCreator(word, audio_field, deck_id, parent_dialog)
-        elif card_type == "Simple Audio":
-            return SimpleAudioCardCreator(word, audio_field, deck_id, parent_dialog)
-        else:
-            raise ValueError(f"Unknown card type: {card_type}")
-
-# --- Main Dialog Class ---
 
 class CardCreatorDialog(QDialog):
     def __init__(self, parent=None):
