@@ -36,6 +36,17 @@ This section is for setting up the project for development or if you wish to man
 *   Anki Desktop application (version 2.1.20+ recommended, though tested with 25.07.5 development build)
 *   An active internet connection (required for audio generation, dictionary lookups, and translations).
 
+**Gemini API Key Setup:**
+
+To use the Gemini-powered features, you need to provide your Gemini API key.
+
+1.  **Create a `.env` file:** In the `AnkiCardCreatorAddon/` directory, create a new file named `.env`.
+2.  **Add your API key:** Open the `.env` file and add your Gemini API key in the following format:
+    ```
+    GEMINI_API_KEY="YOUR_GEMINI_API_KEY"
+    ```
+    Replace `"YOUR_GEMINI_API_KEY"` with your actual Gemini API key.
+
 **Project Structure:**
 
 ```
