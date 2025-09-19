@@ -2,3 +2,4 @@ gTTS
 requests
 deep-translator
 eng-to-ipa
+aqt
