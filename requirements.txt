@@ -1,0 +1,4 @@
+pywebview
+gTTS
+genanki
+eng-to-ipa
