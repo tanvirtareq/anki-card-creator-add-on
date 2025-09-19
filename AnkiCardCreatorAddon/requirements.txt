@@ -3,3 +3,5 @@ requests
 deep-translator
 eng-to-ipa
 aqt
+google.generativeai
+python-dotenv

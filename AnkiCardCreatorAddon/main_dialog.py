@@ -5,7 +5,7 @@ from gtts import gTTS
 from . import log
 from .card_creator.card_creator_factory import CardCreatorFactory
 
-from aqt import mw
+from aqt import QCheckBox, mw
 from aqt.qt import (
     QDialog,
     QVBoxLayout,
@@ -40,6 +40,11 @@ class CardCreatorDialog(QDialog):
         layout.addWidget(self.type_label)
         layout.addWidget(self.type_combo)
 
+
+        # Create Checkbox for "Use Gemini"
+        self.use_gemini_checkbox = QCheckBox("Use Gemini")
+        layout.addWidget(self.use_gemini_checkbox)
+
         # Create Button
         self.create_button = QPushButton("Create Card")
         self.create_button.clicked.connect(self.on_create_card)
@@ -51,6 +56,9 @@ class CardCreatorDialog(QDialog):
         word = self.word_input.text().strip()
         card_type = self.type_combo.currentText()
         deck_id = mw.col.decks.current()['id']
+        use_gemini = self.use_gemini_checkbox.isChecked()
+        # Log the Gemini usage
+        log.debug(f"Use Gemini: {use_gemini}")
 
         if not word:
             showWarning("Input word cannot be empty.")
@@ -74,7 +82,7 @@ class CardCreatorDialog(QDialog):
             log.debug(f"Audio saved and added to collection as {final_audio_filename}")
 
             # Use the factory to create the appropriate card
-            creator = CardCreatorFactory.get_creator(card_type, word, audio_field, deck_id, self)
+            creator = CardCreatorFactory.get_creator(card_type, word, audio_field, deck_id, self, use_gemini)
             creator.create_note()
             
             tooltip(f"Card for '{word}' created!", parent=self)
