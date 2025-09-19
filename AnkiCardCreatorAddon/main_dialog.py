@@ -18,6 +18,8 @@ from aqt.qt import (
 )
 from aqt.utils import showWarning, tooltip
 
+# --- Dictionary and Translation Logic ---
+
 def _get_dictionary_data(word):
     try:
         response = requests.get(f"https://api.dictionaryapi.dev/api/v2/entries/en/{word}")
@@ -40,7 +42,7 @@ def _get_dictionary_data(word):
             "sentence_en": sentence,
             "sentence_bn": sentence_bn,
         }
-    except Exception as e:
+    except Exception:
         log.error(f"Could not fetch dictionary data for '{word}'", exc_info=True)
         return None
 
@@ -60,6 +62,72 @@ def get_or_create_model(model_name, fields, qfmt, afmt):
         mw.col.models.add_template(model, template)
         mw.col.models.add(model)
     return model
+
+# --- Card Creator Classes (Factory Pattern) ---
+
+class BaseCardCreator:
+    def __init__(self, word, audio_field, deck_id, parent_dialog):
+        self.word = word
+        self.audio_field = audio_field
+        self.deck_id = deck_id
+        self.parent_dialog = parent_dialog
+
+    def create_note(self):
+        raise NotImplementedError
+
+class SimpleAudioCardCreator(BaseCardCreator):
+    def create_note(self):
+        model = get_or_create_model(
+            model_name="Simple Audio Model",
+            fields=['Word', 'Phonetics', 'Audio'],
+            qfmt='{{Audio}}',
+            afmt='{{FrontSide}}<hr id="answer">{{Word}}<br>{{Phonetics}}'
+        )
+        note = mw.col.new_note(model)
+        note['Word'] = self.word
+        note['Phonetics'] = ipa.convert(self.word)
+        note['Audio'] = self.audio_field
+        mw.col.add_note(note, self.deck_id)
+        log.debug(f"Simple Audio note for '{self.word}' added to deck ID {self.deck_id}")
+
+class SpellingRescueCardCreator(BaseCardCreator):
+    def create_note(self):
+        model = get_or_create_model(
+            model_name="Spelling Rescue Model",
+            fields=['Word', 'Audio', 'Meaning (EN)', 'Meaning (BN)', 'Synonyms (EN)', 'Synonyms (BN)', 'Sentence (EN)', 'Sentence (BN)'],
+            qfmt='{{Audio}}<br>{{type:Word}}',
+            afmt='{{FrontSide}}<hr id="answer">'
+                 '<div id="word">{{Word}}</div><br>'
+                 '<b>Meaning:</b> {{Meaning (EN)}}<br><em>{{Meaning (BN)}}</em><br><br>'
+                 '<b>Synonyms:</b> {{Synonyms (EN)}}<br><em>{{Synonyms (BN)}}</em><br><br>'
+                 '<b>Example:</b> {{Sentence (EN)}}<br><em>{{Sentence (BN)}}</em>'
+        )
+        dict_data = _get_dictionary_data(self.word)
+        if not dict_data:
+            showWarning(f"Could not find dictionary data for '{self.word}'.", parent=self.parent_dialog)
+            return
+
+        note = mw.col.new_note(model)
+        note['Word'] = self.word
+        note['Audio'] = self.audio_field
+        note['Meaning (EN)'] = dict_data['meaning_en']
+        note['Meaning (BN)'] = dict_data['meaning_bn']
+        note['Synonyms (EN)'] = dict_data['synonyms_en']
+        note['Synonyms (BN)'] = dict_data['synonyms_bn']
+        note['Sentence (EN)'] = dict_data['sentence_en']
+        note['Sentence (BN)'] = dict_data['sentence_bn']
+        mw.col.add_note(note, self.deck_id)
+        log.debug(f"Spelling Rescue note for '{self.word}' added to deck ID {self.deck_id}")
+
+class CardCreatorFactory:
+    @staticmethod
+    def get_creator(card_type, word, audio_field, deck_id, parent_dialog):
+        if card_type == "Spelling Rescue":
+            return SpellingRescueCardCreator(word, audio_field, deck_id, parent_dialog)
+        elif card_type == "Simple Audio":
+            return SimpleAudioCardCreator(word, audio_field, deck_id, parent_dialog)
+        else:
+            raise ValueError(f"Unknown card type: {card_type}")
 
 # --- Main Dialog Class ---
 
@@ -118,11 +186,9 @@ class CardCreatorDialog(QDialog):
             audio_field = f"[sound:{final_audio_filename}]"
             log.debug(f"Audio saved and added to collection as {final_audio_filename}")
 
-            # 2. Dispatch to card type logic
-            if card_type == "Spelling Rescue":
-                self.create_spelling_rescue_card(word, audio_field, deck_id)
-            else:
-                self.create_simple_audio_card(word, audio_field, deck_id)
+            # Use the factory to create the appropriate card
+            creator = CardCreatorFactory.get_creator(card_type, word, audio_field, deck_id, self)
+            creator.create_note()
             
             tooltip(f"Card for '{word}' created!", parent=self)
             self.word_input.clear()
@@ -134,49 +200,6 @@ class CardCreatorDialog(QDialog):
             mw.progress.finish()
             self.create_button.setEnabled(True)
             self.create_button.setText("Create Card")
-
-    def create_simple_audio_card(self, word, audio_field, deck_id):
-        model = get_or_create_model(
-            model_name="Simple Audio Model",
-            fields=['Word', 'Phonetics', 'Audio'],
-            qfmt='{{Audio}}',
-            afmt='{{FrontSide}}<hr id="answer">{{Word}}<br>{{Phonetics}}'
-        )
-        note = mw.col.new_note(model)
-        note['Word'] = word
-        note['Phonetics'] = ipa.convert(word)
-        note['Audio'] = audio_field
-        mw.col.add_note(note, deck_id)
-        log.debug(f"Simple Audio note for '{word}' added to deck ID {deck_id}")
-
-    def create_spelling_rescue_card(self, word, audio_field, deck_id):
-        model = get_or_create_model(
-            model_name="Spelling Rescue Model",
-            fields=['Word', 'Audio', 'Meaning (EN)', 'Meaning (BN)', 'Synonyms (EN)', 'Synonyms (BN)', 'Sentence (EN)', 'Sentence (BN)'],
-            qfmt='{{Audio}}<br>{{type:Word}}',
-            afmt='{{FrontSide}}<hr id="answer">'
-                 '<div id="word">{{Word}}</div><br>'
-                 '<b>Meaning:</b> {{Meaning (EN)}}<br><em>{{Meaning (BN)}}</em><br><br>'
-                 '<b>Synonyms:</b> {{Synonyms (EN)}}<br><em>{{Synonyms (BN)}}</em><br><br>'
-                 '<b>Example:</b> {{Sentence (EN)}}<br><em>{{Sentence (BN)}}</em>'
-        )
-        dict_data = _get_dictionary_data(word)
-        if not dict_data:
-            showWarning(f"Could not find dictionary data for '{word}'.")
-            return
-
-        note = mw.col.new_note(model)
-        note['Word'] = word
-        note['Audio'] = audio_field
-        note['Meaning (EN)'] = dict_data['meaning_en']
-        note['Meaning (BN)'] = dict_data['meaning_bn']
-        note['Synonyms (EN)'] = dict_data['synonyms_en']
-        note['Synonyms (BN)'] = dict_data['synonyms_bn']
-        note['Sentence (EN)'] = dict_data['sentence_en']
-        note['Sentence (BN)'] = dict_data['sentence_bn']
-        mw.col.add_note(note, deck_id)
-        log.debug(f"Spelling Rescue note for '{word}' added to deck ID {deck_id}")
-
 
 def show_main_dialog():
     dialog = CardCreatorDialog(mw)
