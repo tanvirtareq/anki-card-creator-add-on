@@ -51,7 +51,7 @@ cd "${DEST_DIR}"
 if [ -f "requirements.txt" ]; then
     # Ensure the vendor directory exists
     mkdir -p vendor
-    pip3 install -r requirements.txt -t ./vendor
+    pip3 install -r requirements.txt -t ./vendor > /dev/null 2>&1
     echo "Dependencies installed."
 else
     echo "Warning: requirements.txt not found. Skipping dependency installation."
@@ -59,7 +59,17 @@ fi
 
 # 5. Restart Anki
 echo "Restarting Anki..."
-# Use `open` command on macOS. Assumes Anki is in the default /Applications folder.
 open "/Applications/${ANKI_APP_NAME}.app"
 
 echo "Deployment complete!"
+
+# 6. Tail the log file
+LOG_FILE="${DEST_DIR}/addon.log"
+echo "
+--- Tailing log file: ${LOG_FILE} ---
+Press Ctrl+C to stop.
+"
+
+# Ensure log file exists before tailing
+touch "${LOG_FILE}"
+tail -f "${LOG_FILE}"

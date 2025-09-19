@@ -6,6 +6,9 @@ from gtts import gTTS
 from deep_translator import GoogleTranslator
 import eng_to_ipa as ipa
 
+# Import the logger instance from the main __init__.py
+from . import log
+
 from aqt import mw
 from aqt.qt import (
     QDialog,
@@ -44,7 +47,7 @@ def _get_dictionary_data(word):
             "sentence_bn": sentence_bn,
         }
     except Exception as e:
-        print(f"Could not fetch dictionary data: {e}")
+        log.error(f"Could not fetch dictionary data for '{word}'", exc_info=True)
         return None
 
 # --- Anki Model Management ---
@@ -52,6 +55,7 @@ def _get_dictionary_data(word):
 def get_or_create_model(model_name, fields, qfmt, afmt):
     model = mw.col.models.by_name(model_name)
     if model is None:
+        log.debug(f"Model '{model_name}' not found, creating it.")
         model = mw.col.models.new(model_name)
         for field in fields:
             mw.col.models.add_field(model, mw.col.models.new_field(field))
@@ -105,15 +109,20 @@ class CardCreatorDialog(QDialog):
 
         self.create_button.setEnabled(False)
         self.create_button.setText("Creating...")
-        mw.progress.start(label="Creating card...")
+        mw.progress.start(label=f"Creating card for '{word}'...")
 
         try:
+            log.debug(f"Creating card for '{word}' of type '{card_type}'")
             # 1. Generate and add audio
             tts = gTTS(text=word, lang='en')
             audio_filename = f"ankicardcreator_{word.replace(' ', '_')}.mp3"
-            temp_audio_path = os.path.join(mw.col.media.dir(), audio_filename)
+            # Use a temporary path first, then add to media collection
+            temp_audio_path = os.path.join(mw.pm.base, audio_filename)
             tts.save(temp_audio_path)
-            audio_field = f"[sound:{audio_filename}]"
+            # Add file to media collection and get the final filename
+            final_audio_filename = mw.col.media.add_file(temp_audio_path)
+            audio_field = f"[sound:{final_audio_filename}]"
+            log.debug(f"Audio saved and added to collection as {final_audio_filename}")
 
             # 2. Dispatch to card type logic
             if card_type == "Spelling Rescue":
@@ -125,6 +134,7 @@ class CardCreatorDialog(QDialog):
             self.word_input.clear()
 
         except Exception as e:
+            log.error("An error occurred during card creation.", exc_info=True)
             showWarning(f"An error occurred: {e}")
         finally:
             mw.progress.finish()
@@ -143,6 +153,7 @@ class CardCreatorDialog(QDialog):
         note['Phonetics'] = ipa.convert(word)
         note['Audio'] = audio_field
         mw.col.add_note(note, deck_id)
+        log.debug(f"Simple Audio note for '{word}' added to deck ID {deck_id}")
 
     def create_spelling_rescue_card(self, word, audio_field, deck_id):
         model = get_or_create_model(
@@ -170,6 +181,7 @@ class CardCreatorDialog(QDialog):
         note['Sentence (EN)'] = dict_data['sentence_en']
         note['Sentence (BN)'] = dict_data['sentence_bn']
         mw.col.add_note(note, deck_id)
+        log.debug(f"Spelling Rescue note for '{word}' added to deck ID {deck_id}")
 
 
 def show_main_dialog():

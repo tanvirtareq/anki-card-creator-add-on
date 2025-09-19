@@ -3,3 +3,8 @@ gTTS
 genanki
 eng-to-ipa
 deep-translator
+gTTS
+requests
+deep-translator
+eng-to-ipa
+aqt
