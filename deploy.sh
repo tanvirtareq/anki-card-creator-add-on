@@ -20,15 +20,18 @@ SOURCE_DIR="$(pwd)/${ADDON_FOLDER_NAME}"
 # The full path to the destination where the add-on will be installed.
 DEST_DIR="${ADDONS_DIR}/${ADDON_FOLDER_NAME}"
 
-# --- Script Start ---
+# --- Argument Parsing ---
+DEBUG_MODE=false
+if [[ "$1" == "--debug" ]]; then
+    DEBUG_MODE=true
+fi
 
+# --- Script Start ---
 echo "Starting Anki add-on deployment..."
 
 # 1. Quit Anki
 echo "Attempting to quit Anki..."
-# Use pkill to find and kill the process. The `|| true` prevents the script from failing if Anki isn't running.
 pkill -f "${ANKI_APP_NAME}" || true
-# Wait a moment for the process to terminate completely.
 sleep 1
 
 # 2. Remove old add-on version
@@ -39,17 +42,25 @@ else
     echo "No old version to remove."
 fi
 
+# Manage debug flag file in source directory before copying
+DEBUG_FLAG_FILE_SOURCE="${SOURCE_DIR}/DEBUG_LOGGING_ENABLED"
+if $DEBUG_MODE; then
+    echo "Debug mode enabled. Creating debug flag file: ${DEBUG_FLAG_FILE_SOURCE}"
+    touch "${DEBUG_FLAG_FILE_SOURCE}"
+else
+    echo "Debug mode disabled. Removing debug flag file: ${DEBUG_FLAG_FILE_SOURCE}"
+    rm -f "${DEBUG_FLAG_FILE_SOURCE}"
+fi
+
 # 3. Copy new add-on version
 echo "Copying add-on from ${SOURCE_DIR} to ${ADDONS_DIR}"
 cp -R "${SOURCE_DIR}" "${ADDONS_DIR}/"
 
 # 4. Install dependencies
 echo "Installing dependencies into the new add-on's vendor folder..."
-# Important: Change directory to the *destination* to run pip
 cd "${DEST_DIR}"
 
 if [ -f "requirements.txt" ]; then
-    # Ensure the vendor directory exists
     mkdir -p vendor
     pip3 install -r requirements.txt -t ./vendor > /dev/null 2>&1
     echo "Dependencies installed."
@@ -63,13 +74,10 @@ open "/Applications/${ANKI_APP_NAME}.app"
 
 echo "Deployment complete!"
 
-# 6. Tail the log file
-LOG_FILE="${DEST_DIR}/addon.log"
-echo "
---- Tailing log file: ${LOG_FILE} ---
-Press Ctrl+C to stop.
-"
-
-# Ensure log file exists before tailing
-touch "${LOG_FILE}"
-tail -f "${LOG_FILE}"
+# 6. Tail the log file (only if debug mode is enabled)
+if $DEBUG_MODE; then
+    LOG_FILE="${DEST_DIR}/addon.log"
+    echo -e "\n--- Tailing log file: ${LOG_FILE} ---\nPress Ctrl+C to stop.\n"
+    touch "${LOG_FILE}"
+    tail -f "${LOG_FILE}"
+fi
