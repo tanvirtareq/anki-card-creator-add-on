@@ -1,4 +1,3 @@
-# __init__.py
 
 import os
 import sys
@@ -37,13 +36,21 @@ def open_card_creator():
     log.debug("'Add Card' button clicked, opening main dialog.")
     show_main_dialog()
 
-def setup_button(deck_browser):
-    """Add a button to the Deck Browser toolbar."""
-    log.debug(f"Setting up button in Deck Browser: {deck_browser}")
-    action = QAction("Add Card", deck_browser.bottom_bar)
-    action.triggered.connect(open_card_creator)
-    deck_browser.bottom_bar.addSeparator()
-    deck_browser.bottom_bar.addAction(action)
 
-# Use the official gui_hooks to add the button.
-gui_hooks.deck_browser_did_render.append(setup_button)
+# import the main window object (mw) from aqt
+from aqt import mw
+# import the "show info" tool from utils.py
+from aqt.utils import showInfo, qconnect
+# import all of the Qt GUI library
+from aqt.qt import *
+
+# We're going to add a menu item below. First we want to create a function to
+# be called when the menu item is activated.
+
+# create a new menu item, "Add Card"
+action = QAction("Add Card", mw)
+# set it to call open_card_creator when it's clicked
+qconnect(action.triggered, open_card_creator)
+# and add it to the tools menu
+mw.form.menuTools.addAction(action)
+

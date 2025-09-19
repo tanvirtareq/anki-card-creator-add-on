@@ -186,4 +186,6 @@ class CardCreatorDialog(QDialog):
 
 def show_main_dialog():
     dialog = CardCreatorDialog(mw)
-    dialog.exec_()
+    log.debug("Showing main dialog.")
+    dialog.show()
+    # dialog.exec_()
