@@ -111,7 +111,10 @@ SPELLING_RECALL_FRONT_TEMPLATE = """
 
 .audio-line {
   margin-bottom: 10px;
+	text-align:center
+
 }
+
 
 </style>
 
@@ -126,29 +129,47 @@ SPELLING_RECALL_FRONT_TEMPLATE = """
 
 SPELLING_RECALL_GEMINI_BACK_TEMPLATE = """
 <style>
-.field-label { display: block; margin-top: 10px; }
-.word-line {
+.field-label { margin-top: 10px; }
+.word-line{
   font-weight: bold;
   font-size: 30px;
+	text-align: center;
 }
+
+.field-label{
+  font-weight: bold;
+  font-size: 20px;
+	text-align: center;
+	margin-top:20px
+}
+
 </style>
 
 <div class="word-line">
 {{type:Word}}
 </div>
 
-
-<span class="field-label">Correct Word:</span>
+<div>
+<div class="field-label">Correct Word:</div>
+<div class="word-line">
 {{Word}}
+</div>
+</div>
 
-<span class="field-label">Meaning:</span>
+<div>
+<div class="field-label">Meaning:</div>
 {{Meanings}}
+</div>
 
-<span class="field-label">Synonyms:</span>
+<div>
+<div class="field-label">Synonyms:</div>
 {{Synonyms}}
+</div>
 
-<span class="field-label">Usage in Sentence:</span>
+<div>
+<div class="field-label">Usage in Sentence:</div>
 {{UsageInSentence}}
+</div>
 
 """
 
@@ -181,7 +202,6 @@ BASIC_MODEL_FRONT_TEMPLATE = """
 <div class="word-line">
   {{Word}}
 </div>
-
 
 """
 
