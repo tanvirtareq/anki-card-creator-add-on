@@ -36,7 +36,7 @@ class CardCreatorDialog(QDialog):
         # Card Type Selector
         self.type_label = QLabel("Select Type:")
         self.type_combo = QComboBox()
-        self.type_combo.addItems(["Spelling Rescue", "Simple Audio"])
+        self.type_combo.addItems(["Spelling Rescue", "Basic", "Simple Audio"])
         layout.addWidget(self.type_label)
         layout.addWidget(self.type_combo)
 
