@@ -1,4 +1,5 @@
 import os
+import re
 from gtts import gTTS
 
 # Import the logger instance from the main __init__.py
@@ -9,14 +10,62 @@ from aqt import QCheckBox, mw
 from aqt.qt import (
     QDialog,
     QVBoxLayout,
+    QHBoxLayout,
     QLabel,
     QLineEdit,
     QComboBox,
     QPushButton,
+    QTextEdit,
 )
 from aqt.utils import showWarning, tooltip
+from aqt import sound
 
 # --- Dictionary and Translation Logic ---
+
+class CardDataDialog(QDialog):
+    def __init__(self, note, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Created Card Data")
+        self.setup_ui(note)
+
+    def setup_ui(self, note):
+        layout = QVBoxLayout(self)
+
+        for name, value in note.items():
+            h_layout = QHBoxLayout()
+            name_label = QLabel(f"<b>{name}:</b>")
+            name_label.setFixedWidth(100) # Adjust width as needed
+            h_layout.addWidget(name_label)
+
+            if name == 'Audio' and value:
+                # Extract filename from [sound:...] tag
+                match = re.search(r'\[sound:(.*?)\]', value)
+                if match:
+                    audio_file = match.group(1)
+                    value_label = QLabel(audio_file)
+                    play_button = QPushButton("Play")
+                    play_button.clicked.connect(lambda _, a=audio_file: self.play_audio(a))
+                    h_layout.addWidget(value_label)
+                    h_layout.addWidget(play_button)
+                else:
+                    value_label = QLabel(value)
+                    h_layout.addWidget(value_label)
+            else:
+                value_label = QLabel(value)
+                value_label.setWordWrap(True)
+                h_layout.addWidget(value_label)
+
+            layout.addLayout(h_layout)
+
+        self.close_button = QPushButton("Close")
+        self.close_button.clicked.connect(self.accept)
+        layout.addWidget(self.close_button)
+
+        self.setLayout(layout)
+        self.setMinimumSize(500, 300)
+
+    def play_audio(self, audio_file):
+        sound.play(audio_file)
 
 class CardCreatorDialog(QDialog):
     def __init__(self, parent=None):
@@ -83,10 +132,14 @@ class CardCreatorDialog(QDialog):
 
             # Use the factory to create the appropriate card
             creator = CardCreatorFactory.get_creator(card_type, word, audio_field, deck_id, self, use_gemini)
-            creator.create_note()
-            
-            tooltip(f"Card for '{word}' created!", parent=self)
-            self.word_input.clear()
+            note = creator.create_note()
+
+            if note:
+                tooltip(f"Card for '{word}' created!", parent=self)
+                self.word_input.clear()
+                # Show the card data in a new window
+                self.card_data_dialog = CardDataDialog(note, self)
+                self.card_data_dialog.show()
 
         except Exception as e:
             log.error("An error occurred during card creation.", exc_info=True)

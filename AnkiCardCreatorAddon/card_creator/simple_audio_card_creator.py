@@ -18,3 +18,4 @@ class SimpleAudioCardCreator(BaseCardCreator):
         note['Audio'] = self.audio_field
         mw.col.add_note(note, self.deck_id)
         log.debug(f"Simple Audio note for '{self.word}' added to deck ID {self.deck_id}")
+        return note
