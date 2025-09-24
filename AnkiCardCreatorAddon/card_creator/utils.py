@@ -136,6 +136,11 @@ SPELLING_RECALL_GEMINI_BACK_TEMPLATE = """
 	text-align: center;
 }
 
+.audio-line {
+  margin-bottom: 10px;
+	text-align: center;
+}
+
 .field-label{
   font-weight: bold;
   font-size: 20px;
@@ -144,6 +149,10 @@ SPELLING_RECALL_GEMINI_BACK_TEMPLATE = """
 }
 
 </style>
+
+<div class="audio-line">
+  {{Audio}}
+</div>
 
 <div class="word-line">
 {{type:Word}}
@@ -170,6 +179,7 @@ SPELLING_RECALL_GEMINI_BACK_TEMPLATE = """
 <div class="field-label">Usage in Sentence:</div>
 {{UsageInSentence}}
 </div>
+
 
 """
 
