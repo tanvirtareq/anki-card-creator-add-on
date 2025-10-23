@@ -3,6 +3,23 @@
 # Exit immediately if a command exits with a non-zero status.
 set -e
 
+# --- Python Version and Tool Check ---
+PYTHON_EXECUTABLE="python3.13"
+
+if ! command -v $PYTHON_EXECUTABLE &> /dev/null; then
+    echo "Python 3.13 not found. Attempting to install with Homebrew..."
+    if ! command -v brew &> /dev/null; then
+        echo "Error: Homebrew (brew) is not installed. Please install it or install Python 3.13 manually."
+        exit 1
+    fi
+    brew install python@3.13
+    # After installation, the command should be available.
+    if ! command -v $PYTHON_EXECUTABLE &> /dev/null; then
+        echo "Error: Python 3.13 installation failed. Please install it manually."
+        exit 1
+    fi
+fi
+
 # --- Configuration ---
 # The name of the main Anki application.
 ANKI_APP_NAME="Anki"
@@ -62,7 +79,7 @@ cd "${DEST_DIR}"
 
 if [ -f "requirements.txt" ]; then
     mkdir -p vendor
-    pip3 install -r requirements.txt -t ./vendor > /dev/null 2>&1
+    $PYTHON_EXECUTABLE -m pip install -r requirements.txt -t ./vendor > /dev/null 2>&1
     echo "Dependencies installed."
 else
     echo "Warning: requirements.txt not found. Skipping dependency installation."
