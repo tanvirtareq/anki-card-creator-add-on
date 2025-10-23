@@ -105,6 +105,129 @@ def get_basic_model():
         afmt=BASIC_MODEL_BACK_TEMPLATE
     )
 
+WORD_RESCUE_MODEL_FRONT_TEMPLATE = """
+<style>
+.field-label {
+  display: block;
+  margin-top: 10px;
+  font-weight: bold;
+  font-size: 20px;
+  text-align: center;
+}
+
+.content {
+  font-size: 18px;
+  text-align: center;
+  margin-top: 5px;
+}
+
+.word-input {
+  margin-top: 20px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 28px;
+}
+
+.container {
+  text-align: center;
+  margin: 20px;
+}
+</style>
+
+<div class="container">
+  <div class="field-label">Meaning (EN):</div>
+  <div class="content">{{Meaning (EN)}}</div>
+
+  <div class="field-label">Meaning (BN):</div>
+  <div class="content"><em>{{Meaning (BN)}}</em></div>
+
+  <div class="field-label">Synonyms (EN):</div>
+  <div class="content">{{Synonyms (EN)}}</div>
+
+  <div class="field-label">Synonyms (BN):</div>
+  <div class="content"><em>{{Synonyms (BN)}}</em></div>
+
+  <div class="word-input">
+    {{type:Word}}
+  </div>
+</div>
+
+
+"""
+
+WORD_RESCUE_MODEL_BACK_TEMPLATE = """
+<style>
+.audio-line {
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.word-line {
+  font-weight: bold;
+  font-size: 50px;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.field-label {
+  display: block;
+  margin-top: 10px;
+  font-weight: bold;
+  font-size: 20px;
+  text-align: center;
+}
+
+.content {
+  font-size: 18px;
+  text-align: center;
+  margin-top: 5px;
+}
+
+.container {
+  text-align: center;
+  margin: 20px;
+}
+</style>
+
+<div class="container">
+  <div class="word-line">
+    {{type:Word}}
+  </div>
+
+  <div class="audio-line">
+    {{Audio}}
+  </div>
+
+  <div class="field-label">Meaning:</div>
+  <div class="content">
+    {{Meaning (EN)}}<br>
+    <em>{{Meaning (BN)}}</em>
+  </div>
+
+  <div class="field-label">Synonyms:</div>
+  <div class="content">
+    {{Synonyms (EN)}}<br>
+    <em>{{Synonyms (BN)}}</em>
+  </div>
+
+  <div class="field-label">Example:</div>
+  <div class="content">
+    {{Sentence (EN)}}<br>
+    <em>{{Sentence (BN)}}</em>
+  </div>
+</div>
+"""
+
+
+def get_or_create_word_rescue_model():
+    return get_or_create_model(
+        model_name="Word Rescue Model 1",
+        fields=NON_AI_MODEL_FIELDS,
+        qfmt=WORD_RESCUE_MODEL_FRONT_TEMPLATE,
+        afmt=WORD_RESCUE_MODEL_BACK_TEMPLATE
+    )
+
+
 SPELLING_RECALL_FRONT_TEMPLATE = """
 <style>
 .field-label { font-weight: bold; display: block; margin-top: 10px; }
@@ -220,5 +343,55 @@ def get_or_create_basic_gemini_model():
         model_name="Basic Model Gemini 1",
         fields=GEMINI_MODEL_FIELDS,
         qfmt=BASIC_MODEL_FRONT_TEMPLATE,
+        afmt=SPELLING_RECALL_GEMINI_BACK_TEMPLATE
+    )
+
+WORD_RESCUE_GEMINI_MODEL_FRONT_TEMPLATE = """
+<style>
+.field-label { 
+  margin-top: 10px;
+  font-weight: bold;
+  font-size: 20px;
+  text-align: center;
+}
+
+.word-input {
+  font-size: 28px;
+  text-align: center;
+  margin-top: 25px;
+  font-weight: bold;
+}
+
+.container {
+  text-align: center;
+  margin: 20px;
+}
+
+.meanings, .synonyms {
+  margin-top: 10px;
+  font-size: 18px;
+}
+</style>
+
+<div class="container">
+  <div class="field-label">Meaning:</div>
+  <div class="meanings">{{Meanings}}</div>
+
+  <div class="field-label">Synonyms:</div>
+  <div class="synonyms">{{Synonyms}}</div>
+
+  <div class="word-input">
+    {{type:Word}}
+  </div>
+</div>
+
+
+"""
+
+def get_or_create_word_rescue_gemini_model():
+    return get_or_create_model(
+        model_name="Word Rescue Gemini Model 1",
+        fields=GEMINI_MODEL_FIELDS,
+        qfmt=WORD_RESCUE_GEMINI_MODEL_FRONT_TEMPLATE,
         afmt=SPELLING_RECALL_GEMINI_BACK_TEMPLATE
     )

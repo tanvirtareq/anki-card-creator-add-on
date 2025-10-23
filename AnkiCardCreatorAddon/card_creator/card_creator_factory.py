@@ -1,3 +1,5 @@
+from AnkiCardCreatorAddon.card_creator.word_rescue_card_creator import WordRescueCardCreator
+from AnkiCardCreatorAddon.card_creator.word_rescue_gemini_card_creator import WordRescueGeminiCardCreator
 from ..logger import log
 from .spelling_rescue_card_creator import SpellingRescueCardCreator
 from .simple_audio_card_creator import SimpleAudioCardCreator
@@ -13,6 +15,8 @@ class CardCreatorFactory:
             return CardCreatorFactory.get_spelling_rescue_creator(word, audio_field, deck_id, parent_dialog, use_gemini)
         elif card_type == "Basic":
             return CardCreatorFactory.get_basic_card_creator(word, audio_field, deck_id, parent_dialog, use_gemini)
+        elif card_type == "Word Rescue":
+            return CardCreatorFactory.get_word_rescue_creator(word, audio_field, deck_id, parent_dialog, use_gemini)
         elif card_type == "Simple Audio":
             return SimpleAudioCardCreator(word, audio_field, deck_id, parent_dialog)
         else:
@@ -33,3 +37,11 @@ class CardCreatorFactory:
             return BasicGeminiCardCreator(word, audio_field, deck_id, parent_dialog)
         else:
             return BasicCardCreator(word, audio_field, deck_id, parent_dialog)
+    
+    @staticmethod
+    def get_word_rescue_creator(word, audio_field, deck_id, parent_dialog, use_gemini):
+        log.debug("CardCreatorFactory: Getting Word Rescue creator")
+        if use_gemini:
+            return WordRescueGeminiCardCreator(word, audio_field, deck_id, parent_dialog)
+        else:
+            return WordRescueCardCreator(word, audio_field, deck_id, parent_dialog)

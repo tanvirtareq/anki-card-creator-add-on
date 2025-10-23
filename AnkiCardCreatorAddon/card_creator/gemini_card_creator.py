@@ -22,7 +22,6 @@ class GeminiCardCreator(BaseCardCreator):
         note['Synonyms'] = dict_data['Synonyms']
         note['UsageInSentence'] = dict_data['UsageInSentence']
         mw.col.add_note(note, self.deck_id)
-        log.debug(f"Spelling Rescue note for '{self.word}' added to deck ID {self.deck_id}")
         return note
 
     def get_model(self):
