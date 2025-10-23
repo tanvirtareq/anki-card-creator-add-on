@@ -2,17 +2,20 @@
 
 ## 1. What this Add-on Does
 
-This Anki add-on provides a streamlined way to create rich flashcards directly within your Anki application. It supports two distinct card types, automatically fetches dictionary data, translates it to Bangla, and handles media, making card creation efficient and comprehensive.
+This Anki add-on provides a streamlined way to create rich flashcards directly within your Anki application. It supports multiple card types, automatically fetches dictionary data, translates it to Bangla, and handles media, making card creation efficient and comprehensive.
 
 **Key Features:**
 
 *   **Integrated UI:** A dedicated "Add Card" button appears in Anki's Deck Browser for quick access.
 *   **Adds to Current Deck:** New cards are automatically added to the deck you are currently viewing in Anki.
-*   **Two Card Types:**
-    *   **Simple Audio:** A basic card with audio on the front and the word/phonetic transcription on the back.
-    *   **Spelling Rescue:** An interactive card designed for spelling practice. The front features audio and a text input field for the user to type the word. The back displays the correct word, its meaning (English & Bangla), synonyms (English & Bangla), and usage in a sentence (English & Bangla).
+*   **Multiple Card Types:**
+    *   **Basic Card:** A standard, two-sided flashcard for simple facts, vocabulary, or questions and answers.
+    *   **Simple Audio:** A card that plays audio on the front and shows the word and phonetics on the back. Excellent for language learning.
+    *   **Spelling Rescue:** An interactive card for spelling practice. The front features audio and a text input field. The back displays the correct word, its meaning, synonyms, and usage in a sentence.
+    *   **Word Rescue:** A card to help you learn and remember challenging words by providing context (like a definition or a sentence with a blank) and asking you to recall the word.
+*   **Gemini-Powered Content Generation:** For Basic, Spelling Rescue, and Word Rescue cards, you can use the Gemini-powered versions to automatically generate card content (definitions, translations, example sentences).
 *   **Automatic Data Fetching & Translation:** For "Spelling Rescue" cards, the add-on automatically retrieves word definitions, synonyms, and example sentences from a dictionary API and translates them to Bangla.
-*   **Automatic Model Creation:** The necessary Anki Note Types ("Simple Audio Model" and "Spelling Rescue Model") are automatically created in your collection if they don't already exist.
+*   **Automatic Model Creation:** The necessary Anki Note Types are automatically created in your collection if they don't already exist.
 *   **Seamless Media Handling:** Generated audio files are automatically added to your Anki collection's media folder, ensuring they work across devices.
 
 ## 2. How to Use
@@ -22,7 +25,7 @@ This Anki add-on provides a streamlined way to create rich flashcards directly w
 3.  **Click "Add Card":** A new "Add Card" button will be visible on the bottom toolbar of the Deck Browser. Click it.
 4.  **Create Your Card:** A dedicated "Anki Card Creator" window will appear:
     *   Enter the English word or phrase you wish to create a card for.
-    *   Select the desired card type from the dropdown menu: "Simple Audio" or "Spelling Rescue".
+    *   Select the desired card type from the dropdown menu.
     *   Click the "Create Card" button.
 5.  **Card Added:** The new card will be automatically added to the deck you were viewing when you clicked the "Add Card" button.
 
@@ -32,7 +35,7 @@ This section is for setting up the project for development or if you wish to man
 
 **Requirements:**
 
-*   [Python 3](https://www.python.org/downloads/) (3.8+ recommended)
+*   **Python 3.13:** This add-on requires Python 3.13 to run. The `deploy.sh` script for macOS includes a check and an installer for this.
 *   Anki Desktop application (version 2.1.20+ recommended, though tested with 25.07.5 development build)
 *   An active internet connection (required for audio generation, dictionary lookups, and translations).
 
