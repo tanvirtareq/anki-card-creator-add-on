@@ -16,6 +16,8 @@ from aqt.qt import (
     QComboBox,
     QPushButton,
     QTextEdit,
+    QRadioButton,
+    QButtonGroup,
 )
 from aqt.utils import showWarning, tooltip
 from aqt import sound
@@ -90,9 +92,25 @@ class CardCreatorDialog(QDialog):
         layout.addWidget(self.type_combo)
 
 
-        # Create Checkbox for "Use Gemini"
-        self.use_gemini_checkbox = QCheckBox("Use Gemini")
-        layout.addWidget(self.use_gemini_checkbox)
+        # AI Provider Selection (Radio Buttons)
+        layout.addWidget(QLabel("AI Content Provider:"))
+        ai_layout = QHBoxLayout()
+        self.ai_group = QButtonGroup(self)
+        
+        self.none_radio = QRadioButton("None")
+        self.gemini_radio = QRadioButton("Gemini")
+        self.ollama_radio = QRadioButton("Ollama")
+        
+        self.none_radio.setChecked(True) # Default to None
+        
+        self.ai_group.addButton(self.none_radio)
+        self.ai_group.addButton(self.gemini_radio)
+        self.ai_group.addButton(self.ollama_radio)
+        
+        ai_layout.addWidget(self.none_radio)
+        ai_layout.addWidget(self.gemini_radio)
+        ai_layout.addWidget(self.ollama_radio)
+        layout.addLayout(ai_layout)
 
         # Create Button
         self.create_button = QPushButton("Create Card")
@@ -105,9 +123,16 @@ class CardCreatorDialog(QDialog):
         word = self.word_input.text().strip()
         card_type = self.type_combo.currentText()
         deck_id = mw.col.decks.current()['id']
-        use_gemini = self.use_gemini_checkbox.isChecked()
-        # Log the Gemini usage
-        log.debug(f"Use Gemini: {use_gemini}")
+        
+        # Determine AI provider
+        if self.gemini_radio.isChecked():
+            ai_provider = "Gemini"
+        elif self.ollama_radio.isChecked():
+            ai_provider = "Ollama"
+        else:
+            ai_provider = "None"
+            
+        log.debug(f"Selected AI Provider: {ai_provider}")
 
         if not word:
             showWarning("Input word cannot be empty.")
@@ -131,7 +156,7 @@ class CardCreatorDialog(QDialog):
             log.debug(f"Audio saved and added to collection as {final_audio_filename}")
 
             # Use the factory to create the appropriate card
-            creator = CardCreatorFactory.get_creator(card_type, word, audio_field, deck_id, self, use_gemini)
+            creator = CardCreatorFactory.get_creator(card_type, word, audio_field, deck_id, self, ai_provider)
             note = creator.create_note()
 
             if note:

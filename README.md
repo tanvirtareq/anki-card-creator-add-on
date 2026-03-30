@@ -13,7 +13,7 @@ This Anki add-on provides a streamlined way to create rich flashcards directly w
     *   **Simple Audio:** A card that plays audio on the front and shows the word and phonetics on the back. Excellent for language learning.
     *   **Spelling Rescue:** An interactive card for spelling practice. The front features audio and a text input field. The back displays the correct word, its meaning, synonyms, and usage in a sentence.
     *   **Word Rescue:** A card to help you learn and remember challenging words by providing context (like a definition or a sentence with a blank) and asking you to recall the word.
-*   **Gemini-Powered Content Generation:** For Basic, Spelling Rescue, and Word Rescue cards, you can use the Gemini-powered versions to automatically generate card content (definitions, translations, example sentences).
+*   **AI-Powered Content Generation:** For Basic, Spelling Rescue, and Word Rescue cards, you can use **Gemini** or **Ollama** to automatically generate card content (definitions, translations, example sentences).
 *   **Automatic Data Fetching & Translation:** For "Spelling Rescue" cards, the add-on automatically retrieves word definitions, synonyms, and example sentences from a dictionary API and translates them to Bangla.
 *   **Automatic Model Creation:** The necessary Anki Note Types are automatically created in your collection if they don't already exist.
 *   **Seamless Media Handling:** Generated audio files are automatically added to your Anki collection's media folder, ensuring they work across devices.
@@ -49,6 +49,17 @@ To use the Gemini-powered features, you need to provide your Gemini API key.
     GEMINI_API_KEY="YOUR_GEMINI_API_KEY"
     ```
     Replace `"YOUR_GEMINI_API_KEY"` with your actual Gemini API key.
+
+**Ollama Setup:**
+
+To use Ollama for content generation:
+
+1.  **Install Ollama:** Download and install Ollama from [ollama.com](https://ollama.com).
+2.  **Download the Model:** Open your terminal and run the following command to download the required model:
+    ```bash
+    ollama pull gemma3:1b
+    ```
+3.  **Run Ollama:** Ensure the Ollama application is running before creating cards in Anki.
 
 **Project Structure:**
 

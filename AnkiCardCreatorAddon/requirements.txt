@@ -5,3 +5,4 @@ eng-to-ipa
 aqt
 google.generativeai
 python-dotenv
+ollama

@@ -3,3 +3,8 @@ DEBUG_LOGGING_ENABLED
 __pycache__/
 env/
 */.env
+*/.DS_Store
+*/test.py
+*/test_ollama.py
+*/test_*.py
+AnkiCardCreatorAddon/card_creator/test.py
