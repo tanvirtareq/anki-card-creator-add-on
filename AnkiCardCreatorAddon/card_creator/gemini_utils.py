@@ -9,9 +9,29 @@ from dotenv import load_dotenv
 env_path = os.path.join(os.path.dirname(__file__), "..", ".env")
 load_dotenv(env_path)
 
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+_model = None
 
-model = genai.GenerativeModel("gemini-2.5-flash")
+def _initialize_gemini():
+    """
+    Initializes the Gemini model if not already done.
+    Returns:
+        tuple: (model, error_message)
+    """
+    global _model
+    if _model is not None:
+        return _model, None
+
+    try:
+        api_key = os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            return None, "Gemini API Key is missing. Please add GEMINI_API_KEY to your .env file."
+
+        genai.configure(api_key=api_key)
+        _model = genai.GenerativeModel("gemini-3-flash-preview")
+        return _model, None
+    except Exception as e:
+        log.error(f"Failed to initialize Gemini: {e}")
+        return None, f"Failed to initialize Gemini: {str(e)}"
 
 GEMINI_RESPONSE_JSON_FORMAT = """
 {
@@ -38,6 +58,10 @@ def clean_json_response(response_text):
         raise
 
 def get_word_details_from_gemini(word):
+    model, error = _initialize_gemini()
+    if error:
+        log.error(error)
+        return {'status': 'error', 'message': error, 'Word': word}
 
     prompt = f"""
     Generate a JSON object for an Anki flashcard for the word {word}. Follow these exact rules:
@@ -67,19 +91,37 @@ def get_word_details_from_gemini(word):
 
     log.debug(f"Gemini prompt for '{word}': {prompt}")
 
-    # Using Gemini Flash
-    response = model.generate_content(prompt)
+    try:
+        # Using Gemini Flash
+        response = model.generate_content(prompt)
+        log.debug(f"Gemini raw response for '{word}': {response.text}")
 
-    log.debug(f"Gemini raw response for '{word}': {response.text}")
+        if not response.text:
+            return {'status': 'error', 'message': "Gemini returned an empty response.", 'Word': word}
 
-    json_text = clean_json_response(response.text)
-    log.debug(f"Gemini cleaned response for '{word}': {json_text}")
+        json_text = clean_json_response(response.text)
+        log.debug(f"Gemini cleaned response for '{word}': {json_text}")
 
-    flashcard_json = ast.literal_eval(json_text)
+        flashcard_json = ast.literal_eval(json_text)
+        log.debug(f"Gemini JSON response for '{word}': {flashcard_json}")
 
-    log.debug(f"Gemini JSON response for '{word}': {flashcard_json}")
+        return format_for_anki(flashcard_json)
 
-    return format_for_anki(flashcard_json)
+    except Exception as e:
+        error_msg = str(e)
+        if "API_KEY_INVALID" in error_msg or "400" in error_msg:
+            error_display = "Invalid API Key. Please check your .env file."
+        elif "PERMISSION_DENIED" in error_msg or "403" in error_msg:
+            error_display = "Access Denied. Your API key might be restricted or project access denied."
+        elif "ResourceExhausted" in error_msg or "429" in error_msg:
+            error_display = "API quota exceeded. Please wait a moment and try again."
+        elif "DeadlineExceeded" in error_msg:
+            error_display = "The request timed out. Please check your internet connection."
+        else:
+            error_display = f"An error occurred while calling Gemini: {error_msg}"
+        
+        log.error(f"Error calling Gemini for '{word}': {error_msg}", exc_info=True)
+        return {'status': 'error', 'message': error_display, 'Word': word}
 
 def format_for_anki(flashcard_json):
     """

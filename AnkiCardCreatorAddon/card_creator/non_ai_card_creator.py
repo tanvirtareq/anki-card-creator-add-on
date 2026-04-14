@@ -9,7 +9,7 @@ class NonAICardCreator(BaseCardCreator):
         model = self.get_model()
         dict_data = _get_dictionary_data(self.word)
         if not dict_data:
-            showWarning(f"Could not find dictionary data for '{self.word}'.", parent=self.parent_dialog)
+            self.error_message = f"Could not find dictionary data for '{self.word}'."
             return None
 
         note = mw.col.new_note(model)

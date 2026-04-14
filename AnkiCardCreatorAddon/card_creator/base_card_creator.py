@@ -4,6 +4,7 @@ class BaseCardCreator:
         self.audio_field = audio_field
         self.deck_id = deck_id
         self.parent_dialog = parent_dialog
+        self.error_message = None
 
     def create_note(self):
         raise NotImplementedError

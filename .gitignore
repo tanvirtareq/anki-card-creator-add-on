@@ -3,3 +3,6 @@ DEBUG_LOGGING_ENABLED
 __pycache__/
 env/
 */.env
+*/test.py
+AnkiCardCreatorAddon/card_creator/test.py
+AnkiCardCreatorAddon/addon.log

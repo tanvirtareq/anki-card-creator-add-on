@@ -117,6 +117,7 @@ class CardCreatorDialog(QDialog):
         self.create_button.setText("Creating...")
         mw.progress.start(label=f"Creating card for '{word}'...")
 
+        error_to_show = None
         try:
             log.debug(f"Creating card for '{word}' of type '{card_type}'")
             # 1. Generate and add audio
@@ -140,14 +141,27 @@ class CardCreatorDialog(QDialog):
                 # Show the card data in a new window
                 self.card_data_dialog = CardDataDialog(note, self)
                 self.card_data_dialog.show()
+            elif hasattr(creator, 'error_message') and creator.error_message:
+                error_to_show = creator.error_message
 
         except Exception as e:
-            log.error("An error occurred during card creation.", exc_info=True)
-            showWarning(f"An error occurred: {e}")
+            error_message = str(e)
+            log.error(f"An error occurred during card creation: {error_message}", exc_info=True)
+            
+            # Provide more context for common error types
+            if "Connection" in error_message or "network" in error_message.lower():
+                error_to_show = "A network error occurred. Please check your internet connection."
+            else:
+                error_to_show = f"An error occurred: {error_message}"
+                
         finally:
             mw.progress.finish()
             self.create_button.setEnabled(True)
             self.create_button.setText("Create Card")
+            
+            # Show any deferred error messages after progress is finished
+            if error_to_show:
+                showWarning(error_to_show)
 
 def show_main_dialog():
     dialog = CardCreatorDialog(mw)

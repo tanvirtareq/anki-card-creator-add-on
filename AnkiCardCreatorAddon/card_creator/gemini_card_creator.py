@@ -12,7 +12,7 @@ class GeminiCardCreator(BaseCardCreator):
         log.debug(f"Gemini dictionary data for '{self.word}': {dict_data}")
 
         if not dict_data or dict_data.get('status') != 'ok':
-            showWarning(f"Could not find dictionary data for '{self.word}'.", parent=self.parent_dialog)
+            self.error_message = dict_data.get('message', f"Could not find dictionary data for '{self.word}'.")
             return None
 
         note = mw.col.new_note(model)
